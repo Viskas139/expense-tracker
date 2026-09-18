@@ -8,54 +8,58 @@
 </head>
 <body>
 
-    <header>
+    <header class="site-header">
         <h1>Трекер витрат</h1>
     </header>
 
-    <main>
-        <section id="add-transaction">
-            <h2>Додати операцію</h2>
-            <form action="#">
-                <div>
-                    <label for="transaction-title">Назва операції:</label>
-                    <input type="text" id="transaction-title" name="title" required placeholder="Наприклад, Проїзний">
-                </div>
-                <div>
-                    <label for="transaction-amount">Сума (грн):</label>
-                    <input type="number" id="transaction-amount" name="amount" required placeholder="100 або -50">
-                </div>
-                <div>
-                    <label for="transaction-category">Категорія:</label>
-                    <select id="transaction-category" name="category">
-                        <option value="transport">Транспорт</option>
-                        <option value="food">Їжа</option>
-                        <option value="entertainment">Розваги</option>
-                        <option value="income">Дохід</option>
-                    </select>
-                </div>
-                <button type="submit">Додати</button>
-            </form>
-        </section>
+    <div class="layout-container">
+        <main>
+            <section id="add-transaction">
+                <h2>Додати операцію</h2>
+                <form action="#" class="transaction-form">
+                    <div class="form-group">
+                        <label for="transaction-title">Назва операції:</label>
+                        <input type="text" id="transaction-title" name="title" required placeholder="Наприклад, Проїзний">
+                    </div>
+                    <div class="form-group">
+                        <label for="transaction-amount">Сума (грн):</label>
+                        <input type="number" id="transaction-amount" name="amount" required placeholder="100 або -50">
+                    </div>
+                    <div class="form-group">
+                        <label for="transaction-category">Категорія:</label>
+                        <select id="transaction-category" name="category">
+                            <option value="transport">Транспорт</option>
+                            <option value="food">Їжа</option>
+                            <option value="entertainment">Розваги</option>
+                            <option value="income">Дохід</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="submit-btn">Додати</button>
+                </form>
+            </section>
 
-        <section id="transactions-list">
-            <h2>Операції</h2>
+            <section id="transactions-list">
+                <h2>Операції</h2>
 
-        <article>
-            <h3><span class="amount amount--expense">-150 грн</span> — Транспорт</h3>
-            <p>Оплата за залізничний квиток</p>
-        </article>
+                     <div class="cards">
+                        <article class="transaction-card">
+                            <h3><span class="amount amount--expense">-150 грн</span> — Транспорт</h3>
+                            <p>Оплата за залізничний квиток</p>
+                        </article>
 
-        <article>
-            <h3><span class="amount amount--income">+2000 грн</span> — Дохід</h3>
-            <p>Кишенькові гроші</p>
-        </article>
-        </section>
-    </main>
+                        <article class="transaction-card">
+                            <h3><span class="amount amount--income">+2000 грн</span> — Дохід</h3>
+                            <p>Кишенькові гроші</p>
+                        </article>
+                    </div>
+            </section>
+        </main>
 
-        <aside>
+        <aside class="sidebar-balance">
             <h2>Підсумковий баланс</h2>
             <p class="balance-amount">+1850 грн</p>
         </aside>
+    </div>
 
     <footer>
         <p>Автор: Ліщенко Вікторія. 2026</p>
