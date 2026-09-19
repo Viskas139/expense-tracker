@@ -4,10 +4,10 @@
 
 body {
     margin: 0;
-    font-family: system-ui, -apple-system, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.5;
-    background-color: #f4f6f8;
-    color: #333333;
+    background-color: #f8fafc; 
+    color: #0f172a;
 }
 
 img {
@@ -16,95 +16,130 @@ img {
 }
 
 .site-header {
-    background-color: #1e293b;
+    background-color: #0f172a; 
     color: #ffffff;
     padding: 16px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
 }
 
 .site-header h1 {
     margin: 0;
     font-size: 1.5rem;
-}
-
-.main-nav {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-}
-
-.main-nav a {
-    color: #cbd5e1;
-    text-decoration: none;
-    font-weight: 500;
-}
-
-.main-nav a:hover {
-    color: #ffffff;
+    font-weight: 700;
 }
 
 .layout-container {
     max-width: 1100px;
     margin: 20px auto;
     padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 section, .sidebar-balance {
     background-color: #ffffff;
     padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 8px;
+    border-radius: 12px;
     border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* 
+   ОБҐРУНТУВАННЯ НЕЧІТКОЇ ВИМОГИ:
+   "Має бути зрозуміло з першого погляду, чи все гаразд із бюджетом"
+   1. Підсумковий баланс має наибольший розмір шрифту (2.25rem, Inter extra bold).
+   2. Використано статусну мітку (Бюджет у нормі) для миттєвої оцінки.
+   3. Кожна операція має кольоровий бейдж категорії для швидкого візуального сканування.
+   4. Усі кольори перевірені на контрастність за стандартом WCAG AA (>= 4.5:1).
+*/
+.sidebar-balance {
+    text-align: center;
+    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+    border: 2px solid #cbd5e1;
+}
+
+.balance-title {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #475569;
+}
+
+.balance-amount {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: #0f172a; 
+    margin: 8px 0;
+    letter-spacing: -0.02em;
+}
+
+.balance-status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.status--positive {
+    background-color: #dcfce7;
+    color: #14532d; 
 }
 
 .transaction-form {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
 }
 
 label {
     font-weight: 600;
+    font-size: 0.95rem;
+    color: #1e293b;
 }
 
 input[type="text"],
 input[type="number"],
 select {
     width: 100%;
-    padding: 10px;
+    padding: 10px 14px;
     border: 1px solid #cbd5e1;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 1rem;
+    font-family: inherit;
+    background-color: #ffffff;
+    color: #0f172a;
 }
 
 input:focus, select:focus {
-    outline: none;
-    border-color: #2563eb;
+    outline: 2px solid #2563eb;
+    border-color: transparent;
 }
 
 .submit-btn {
-    background-color: #2563eb;
+    background-color: #1d4ed8; 
     color: #ffffff;
     padding: 12px;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 1rem;
     font-weight: 600;
+    font-family: inherit;
     cursor: pointer;
+    min-height: 44px;
+    transition: background-color 0.2s;
 }
 
 .submit-btn:hover {
-    background-color: #1d4ed8;
+    background-color: #1e40af;
 }
 
 .cards {
@@ -114,41 +149,58 @@ input:focus, select:focus {
 }
 
 .transaction-card {
-    padding: 12px;
+    padding: 16px;
     border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    background-color: #f8fafc;
+    border-radius: 8px;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-.transaction-card h3 {
-    margin: 0 0 4px 0;
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #334155;
+}
+
+.amount {
+    font-weight: 700;
     font-size: 1.1rem;
 }
 
-.transaction-card p {
-    margin: 0;
-    color: #64748b;
-    font-size: 0.9rem;
+.amount--expense {
+    color: #dc2626;
 }
 
-.amount--income { color: #16a34a; }
-.amount--expense { color: #dc2626; }
-
-.sidebar-balance {
-    text-align: center;
+.amount--income {
+    color: #15803d;
 }
 
-.balance-amount {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #345c9d;
-    margin: 8px 0 0 0;
+.category-badge {
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
 }
+
+.badge--transport { background-color: #e0f2fe; color: #0369a1; }
+.badge--income { background-color: #dcfce7; color: #15803d; }
+.badge--food { background-color: #fef3c7; color: #b45309; }
 
 footer {
     text-align: center;
-    padding: 20px;
-    color: #28466f;
+    padding: 24px;
+    color: #64748b;
     font-size: 0.875rem;
 }
 
@@ -182,7 +234,14 @@ footer {
     }
 
     .sidebar-balance {
+        grid-column: 2;
+        grid-row: 1;
         position: sticky;
         top: 20px;
+    }
+
+    main {
+        grid-column: 1;
+        grid-row: 1;
     }
 }

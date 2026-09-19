@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Трекер витрат</title>
+    <title>Трекер кишенькових витрат</title>
+    <!-- Підключення шрифту Inter з Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -13,6 +17,12 @@
     </header>
 
     <div class="layout-container">
+        <aside class="sidebar-balance">
+            <h2 class="balance-title">Підсумковий баланс</h2>
+            <p class="balance-amount">+1850 грн</p>
+            <span class="balance-status status--positive">Бюджет у нормі</span>
+        </aside>
+
         <main>
             <section id="add-transaction">
                 <h2>Додати операцію</h2>
@@ -39,26 +49,26 @@
             </section>
 
             <section id="transactions-list">
-                <h2>Операції</h2>
+                <h2>Останні операції</h2>
+                <div class="cards">
+                    <article class="transaction-card">
+                        <div class="card-header">
+                            <span class="category-badge badge--transport">Транспорт</span>
+                            <span class="amount amount--expense">-150 грн</span>
+                        </div>
+                        <h3 class="card-title">Оплата за залізничний квиток</h3>
+                    </article>
 
-                     <div class="cards">
-                        <article class="transaction-card">
-                            <h3><span class="amount amount--expense">-150 грн</span> — Транспорт</h3>
-                            <p>Оплата за залізничний квиток</p>
-                        </article>
-
-                        <article class="transaction-card">
-                            <h3><span class="amount amount--income">+2000 грн</span> — Дохід</h3>
-                            <p>Кишенькові гроші</p>
-                        </article>
-                    </div>
+                    <article class="transaction-card">
+                        <div class="card-header">
+                            <span class="category-badge badge--income">Дохід</span>
+                            <span class="amount amount--income">+2000 грн</span>
+                        </div>
+                        <h3 class="card-title">Кишенькові гроші</h3>
+                    </article>
+                </div>
             </section>
         </main>
-
-        <aside class="sidebar-balance">
-            <h2>Підсумковий баланс</h2>
-            <p class="balance-amount">+1850 грн</p>
-        </aside>
     </div>
 
     <footer>
