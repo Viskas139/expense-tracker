@@ -1,5 +1,3 @@
-console.log('app.js підключено успішно!');
-
 const transactions = [
     { amount: 2000, type: 'дохід' },
     { amount: 150, type: 'витрата' },
@@ -104,3 +102,42 @@ function updateSummaryUI(items) {
 
 renderTransactions(transactions);
 updateSummaryUI(transactions);
+
+const transactionForm = document.querySelector('#add-transaction-form');
+
+if (transactionForm) {
+    // Додає обробник події для форми додавання транзакції
+    transactionForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const amountInput = document.querySelector('#amount');
+        const typeInput = document.querySelector('#type');
+
+        const amount = Number(amountInput.value);
+        const type = typeInput.value;
+
+        const newTransaction = { amount, type };
+        transactions.push(newTransaction);
+
+        renderTransactions(transactions);
+
+        updateSummaryUI(transactions);
+
+        transactionForm.reset();
+    });
+
+const amountInput = document.querySelector('#amount');
+
+if (amountInput) {
+    // Додає обробник події для перевірки валідності введеної суми
+    amountInput.addEventListener('input', () => {
+        const val = Number(amountInput.value);
+
+        if (amountInput.value !== '' && val <= 0) {
+            amountInput.setCustomValidity('Сума має бути більшою за нуль');
+        } else {
+            amountInput.setCustomValidity('');
+        }
+    });
+}
+}
