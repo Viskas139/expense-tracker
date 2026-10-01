@@ -1,4 +1,6 @@
-const transactions = [
+// Запит до API для отримання даних
+const API_URL = 'https://jsonplaceholder.typicode.com/comments?postId=2';
+let transactions = [
     { amount: 2000, type: 'дохід' },
     { amount: 150, type: 'витрата' },
     { amount: 350, type: 'витрата' },
@@ -141,3 +143,46 @@ if (amountInput) {
     });
 }
 }
+
+async function loadData() {
+    const loadingStatus = document.querySelector('#loading-status');
+    const errorMessage = document.querySelector('#error-message');
+
+    if (loadingStatus) loadingStatus.style.display = 'block';
+    if (errorMessage) errorMessage.style.display = 'none';
+
+    try {
+        const response = await fetch(API_URL);
+
+        if (!response.ok) {
+            throw new Error(`Сервер відповів кодом ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        const apiTransactions = data.map((item, index) => ({
+            amount: (item.id * 50) + 100,
+            type: index % 2 === 0 ? 'витрата' : 'дохід'
+        }));
+
+        transactions = apiTransactions;
+        renderTransactions(transactions);
+        updateSummaryUI(transactions);
+
+    } catch (error) {
+        if (errorMessage) {
+            errorMessage.textContent = 'Записи тимчасово недоступні. Перевірте мережеве з\'єднання.';
+            errorMessage.style.display = 'block';
+        }
+        console.error('Деталі помилки завантаження:', error);
+    } finally {
+        if (loadingStatus) loadingStatus.style.display = 'none';
+    }
+
+     const reloadBtn = document.querySelector('#reload-btn');
+        if (reloadBtn) {
+            reloadBtn.addEventListener('click', loadData);
+    }
+}
+
+loadData();

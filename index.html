@@ -52,6 +52,12 @@
 
             <section id="transactions-list">
                 <h2>Останні операції</h2>
+                <div class="api-controls">
+                     <button id="reload-btn" type="button" class="submit-btn">Оновити дані з API</button>
+                    <p id="loading-status" style="display: none; color: #666; margin-top: 10px;">Завантаження даних...</p>
+                    <p id="error-message" style="display: none; color: #e74c3c; margin-top: 10px; font-weight: bold;"></p>
+                </div>
+                
                 <div class="cards">
                     <article class="transaction-card">
                         <div class="card-header">
