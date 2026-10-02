@@ -71,7 +71,6 @@ function renderTransactions(items) {
 
         const title = document.createElement('h3');
         title.classList.add('card-title');
-        // Додаємо відображення категорії
         title.textContent = `${item.amount} грн (${item.type}) — ${item.category || 'Загальні'}`;
 
         card.append(title);
@@ -111,13 +110,12 @@ if (transactionForm) {
 
         const amountInput = document.querySelector('#amount');
         const typeInput = document.querySelector('#type');
-        const categoryInput = document.querySelector('#category'); // 1. Отримуємо елемент категорії
+        const categoryInput = document.querySelector('#category'); 
 
         const amount = Number(amountInput.value);
         const type = typeInput.value;
-        const category = categoryInput.value.trim(); // 2. Зчитуємо значення категорії
+        const category = categoryInput.value.trim();
 
-        // 3. Додаємо category до об'єкта
         const newTransaction = { 
             amount, 
             type, 
@@ -126,7 +124,6 @@ if (transactionForm) {
 
         transactions.push(newTransaction);
 
-        // Перемальовуємо UI
         renderTransactions(transactions);
         updateSummaryUI(transactions);
 
@@ -136,7 +133,6 @@ if (transactionForm) {
 const amountInput = document.querySelector('#amount');
 
 if (amountInput) {
-    // Додає обробник події для перевірки валідності введеної суми
     amountInput.addEventListener('input', () => {
         const val = Number(amountInput.value);
 
