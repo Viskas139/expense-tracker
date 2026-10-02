@@ -1,5 +1,3 @@
-// Запит до API для отримання даних
-const API_URL = 'https://jsonplaceholder.typicode.com/comments?postId=2';
 let transactions = [
     { amount: 2000, type: 'дохід' },
     { amount: 150, type: 'витрата' },
@@ -63,7 +61,6 @@ function renderTransactions(items) {
     items.forEach(item => {
         const card = document.createElement('article');
         card.classList.add('transaction-card');
-
         card.dataset.amount = item.amount;
 
         if (item.type === 'дохід') {
@@ -74,7 +71,7 @@ function renderTransactions(items) {
 
         const title = document.createElement('h3');
         title.classList.add('card-title');
-        title.textContent = `${item.amount} грн (${item.type})`;
+        title.textContent = `${item.amount} грн (${item.type}) — ${item.category || 'Загальні'}`;
 
         card.append(title);
 
@@ -108,21 +105,26 @@ updateSummaryUI(transactions);
 const transactionForm = document.querySelector('#add-transaction-form');
 
 if (transactionForm) {
-    // Додає обробник події для форми додавання транзакції
     transactionForm.addEventListener('submit', (event) => {
         event.preventDefault();
 
         const amountInput = document.querySelector('#amount');
         const typeInput = document.querySelector('#type');
+        const categoryInput = document.querySelector('#category');
 
         const amount = Number(amountInput.value);
         const type = typeInput.value;
+        const category = categoryInput.value.trim();
 
-        const newTransaction = { amount, type };
+        const newTransaction = { 
+            amount, 
+            type, 
+            category: category || 'Загальні' 
+        };
+
         transactions.push(newTransaction);
 
         renderTransactions(transactions);
-
         updateSummaryUI(transactions);
 
         transactionForm.reset();
@@ -144,6 +146,9 @@ if (amountInput) {
 }
 }
 
+// Посилання на використаний API ендпоінт: https://jsonplaceholder.typicode.com/comments?postId=2
+const API_URL = 'https://jsonplaceholder.typicode.com/comments?postId=2';
+
 async function loadData() {
     const loadingStatus = document.querySelector('#loading-status');
     const errorMessage = document.querySelector('#error-message');
@@ -160,9 +165,11 @@ async function loadData() {
 
         const data = await response.json();
 
-        const apiTransactions = data.map((item, index) => ({
+        const apiTransactions = data.slice(0, 5).map((item, index) => ({
             amount: (item.id * 50) + 100,
-            type: index % 2 === 0 ? 'витрата' : 'дохід'
+            type: index % 2 === 0 ? 'витрата' : 'дохід',
+            category: item.name.substring(0, 20), 
+            description: item.body.substring(0, 50) 
         }));
 
         transactions = apiTransactions;
@@ -178,11 +185,11 @@ async function loadData() {
     } finally {
         if (loadingStatus) loadingStatus.style.display = 'none';
     }
+}
 
-     const reloadBtn = document.querySelector('#reload-btn');
-        if (reloadBtn) {
-            reloadBtn.addEventListener('click', loadData);
-    }
+const reloadBtn = document.querySelector('#reload-btn');
+if (reloadBtn) {
+    reloadBtn.addEventListener('click', loadData);
 }
 
 loadData();
