@@ -1,14 +1,61 @@
 // Запит до API для отримання даних
 const API_URL = 'https://jsonplaceholder.typicode.com/comments?postId=2';
-let transactions = [
-    { amount: 2000, type: 'дохід' },
-    { amount: 150, type: 'витрата' },
-    { amount: 350, type: 'витрата' },
-    { amount: 500, type: 'дохід' },
-    { amount: 120, type: 'витрата' }
-];
 
-// Функція обчислює баланс та суми доходів і витрат
+// Крок 4: Компонент ExpenseRow за Варіантом 17
+const ExpenseRow = {
+    name: 'ExpenseRow',
+    props: {
+        amount: { type: Number, required: true },
+        type: { type: String, required: true },
+        category: { type: String, default: 'Загальні' }
+    },
+    template: `
+        <div class="transaction-card" :class="type === 'дохід' ? 'income' : 'expense'">
+            <div class="transaction-info">
+                <span class="transaction-amount">{{ amount }} грн ({{ type }})</span>
+                <span class="transaction-category">{{ category }}</span>
+            </div>
+        </div>
+    `
+};
+
+// Ініціалізація екземпляра Vue 3
+const app = Vue.createApp({
+    components: {
+        ExpenseRow
+    },
+    data() {
+        return {
+            // Крок 3: Реактивний стан масиву транзакцій
+            transactions: [
+                { amount: 2000, type: 'дохід' },
+                { amount: 150, type: 'витрата' },
+                { amount: 350, type: 'витрата' },
+                { amount: 500, type: 'дохід' },
+                { amount: 120, type: 'витрата' }
+            ]
+        };
+    },
+    // Крок 6: Вичисляємий баланс через computed
+    computed: {
+        totalBalance() {
+            return this.transactions.reduce((sum, item) => {
+                const val = Number(item.amount) || 0;
+                return item.type === 'дохід' ? sum + val : sum - val;
+            }, 0);
+        }
+    }
+});
+
+// Монтування Vue додатку
+const vm = app.mount('#app');
+
+
+// =========================================================================
+// Крок 7: Закоментований застарілий ручний DOM-код для уникнення помилок
+// =========================================================================
+
+/*
 function calculateBalance(items) {
     let totalBalance = 0;
     let totalIncome = 0;
@@ -24,37 +71,22 @@ function calculateBalance(items) {
         }
     }
 
-    console.log(`Загальний баланс: ${totalBalance} грн`);
-    console.log(`Загальні доходи: ${totalIncome} грн`);
-    console.log(`Загальні витрати: ${totalExpense} грн`);
-
-    if (totalBalance > 0) {
-        console.log('Статус бюджету: Баланс додатний (все гаразд з бюджетом)');
-    } else if (totalBalance === 0) {
-        console.log('Статус бюджету: Баланс нульовий');
-    } else {
-        console.log('Статус бюджету: Баланс від’ємний (витрати перевищують доходи)');
-    }
-
     return { totalBalance, totalIncome, totalExpense };
 }
 
+/*
 const summary = calculateBalance(transactions);
-
-// Стрілкова функція для обчислення відсотка
 const toPercent = (part, total) => Math.round((part / total) * 100);
 
 if (summary.totalIncome > 0) {
     const expensePercentage = toPercent(summary.totalExpense, summary.totalIncome);
     console.log(`Витрати складають ${expensePercentage}% від загального доходу`);
 }
+*/
 
-const staticCards = document.querySelectorAll('.transaction-card');
-staticCards.forEach(card => card.remove());
-
+/*
 const listContainer = document.querySelector('#transactions-list .cards');
 
-// Динамічно створює та виводить картки транзакцій у DOM
 function renderTransactions(items) {
     if (listContainer) {
         listContainer.innerHTML = '';
@@ -63,7 +95,6 @@ function renderTransactions(items) {
     items.forEach(item => {
         const card = document.createElement('article');
         card.classList.add('transaction-card');
-
         card.dataset.amount = item.amount;
 
         if (item.type === 'дохід') {
@@ -84,7 +115,6 @@ function renderTransactions(items) {
     });
 }
 
-// Оновлює текстовий вміст елемента підсумкового балансу на сторінці
 function updateSummaryUI(items) {
     let totalBalance = 0;
 
@@ -101,14 +131,12 @@ function updateSummaryUI(items) {
         balanceElement.textContent = `${totalBalance >= 0 ? '+' : ''}${totalBalance} грн`;
     }
 }
+*/
 
-renderTransactions(transactions);
-updateSummaryUI(transactions);
-
+/*
 const transactionForm = document.querySelector('#add-transaction-form');
 
 if (transactionForm) {
-    // Додає обробник події для форми додавання транзакції
     transactionForm.addEventListener('submit', (event) => {
         event.preventDefault();
 
@@ -122,16 +150,16 @@ if (transactionForm) {
         transactions.push(newTransaction);
 
         renderTransactions(transactions);
-
         updateSummaryUI(transactions);
 
         transactionForm.reset();
     });
+}
+*/
 
 const amountInput = document.querySelector('#amount');
 
 if (amountInput) {
-    // Додає обробник події для перевірки валідності введеної суми
     amountInput.addEventListener('input', () => {
         const val = Number(amountInput.value);
 
@@ -142,8 +170,7 @@ if (amountInput) {
         }
     });
 }
-}
-
+// Функція асинхронного завантаження даних з API
 async function loadData() {
     const loadingStatus = document.querySelector('#loading-status');
     const errorMessage = document.querySelector('#error-message');
@@ -165,24 +192,15 @@ async function loadData() {
             type: index % 2 === 0 ? 'витрата' : 'дохід'
         }));
 
-        transactions = apiTransactions;
-        renderTransactions(transactions);
-        updateSummaryUI(transactions);
+        vm.transactions = apiTransactions;
 
     } catch (error) {
         if (errorMessage) {
-            errorMessage.textContent = 'Записи тимчасово недоступні. Перевірте мережеве з\'єднання.';
+            errorMessage.textContent = 'Записи тимчасово недоступні. Перевірте мережеве зєднання.';
             errorMessage.style.display = 'block';
         }
         console.error('Деталі помилки завантаження:', error);
     } finally {
         if (loadingStatus) loadingStatus.style.display = 'none';
     }
-
-     const reloadBtn = document.querySelector('#reload-btn');
-        if (reloadBtn) {
-            reloadBtn.addEventListener('click', loadData);
-    }
 }
-
-loadData();

@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <script src="js/script.js" defer></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 <body>
 
@@ -17,10 +18,10 @@
         <h1>Трекер витрат</h1>
     </header>
 
-    <div class="layout-container">
+    <div id="app" class="layout-container">
         <aside class="sidebar-balance">
             <h2 class="balance-title">Підсумковий баланс</h2>
-            <p class="balance-amount">+1850 грн</p>
+            <p class="balance-amount">{{ totalBalance >= 0 ? '+' : '' }}{{ totalBalance }} грн</p>
             <span class="balance-status status--positive">Бюджет у нормі</span>
         </aside>
 
@@ -53,27 +54,19 @@
             <section id="transactions-list">
                 <h2>Останні операції</h2>
                 <div class="api-controls">
-                     <button id="reload-btn" type="button" class="submit-btn">Оновити дані з API</button>
+                    <button id="reload-btn" type="button" class="submit-btn" onclick="loadData()">Оновити дані з API</button>
                     <p id="loading-status" style="display: none; color: #666; margin-top: 10px;">Завантаження даних...</p>
                     <p id="error-message" style="display: none; color: #e74c3c; margin-top: 10px; font-weight: bold;"></p>
                 </div>
-                
-                <div class="cards">
-                    <article class="transaction-card">
-                        <div class="card-header">
-                            <span class="category-badge badge--transport">Транспорт</span>
-                            <span class="amount amount--expense">-150 грн</span>
-                        </div>
-                        <h3 class="card-title">Оплата за залізничний квиток</h3>
-                    </article>
 
-                    <article class="transaction-card">
-                        <div class="card-header">
-                            <span class="category-badge badge--income">Дохід</span>
-                            <span class="amount amount--income">+2000 грн</span>
-                        </div>
-                        <h3 class="card-title">Кишенькові гроші</h3>
-                    </article>
+                <div class="transactions-list">
+                    <expense-row 
+                        v-for="(item, index) in transactions" 
+                        :key="item.id || index"
+                        :amount="item.amount"
+                        :type="item.type"
+                        :category="item.category || 'Загальні'">
+                    </expense-row>
                 </div>
             </section>
         </main>
