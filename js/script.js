@@ -61,7 +61,6 @@ function renderTransactions(items) {
     items.forEach(item => {
         const card = document.createElement('article');
         card.classList.add('transaction-card');
-
         card.dataset.amount = item.amount;
 
         if (item.type === 'дохід') {
@@ -72,7 +71,8 @@ function renderTransactions(items) {
 
         const title = document.createElement('h3');
         title.classList.add('card-title');
-        title.textContent = `${item.amount} грн (${item.type})`;
+        // Додаємо відображення категорії
+        title.textContent = `${item.amount} грн (${item.type}) — ${item.category || 'Загальні'}`;
 
         card.append(title);
 
@@ -106,21 +106,28 @@ updateSummaryUI(transactions);
 const transactionForm = document.querySelector('#add-transaction-form');
 
 if (transactionForm) {
-    // Додає обробник події для форми додавання транзакції
     transactionForm.addEventListener('submit', (event) => {
         event.preventDefault();
 
         const amountInput = document.querySelector('#amount');
         const typeInput = document.querySelector('#type');
+        const categoryInput = document.querySelector('#category'); // 1. Отримуємо елемент категорії
 
         const amount = Number(amountInput.value);
         const type = typeInput.value;
+        const category = categoryInput.value.trim(); // 2. Зчитуємо значення категорії
 
-        const newTransaction = { amount, type };
+        // 3. Додаємо category до об'єкта
+        const newTransaction = { 
+            amount, 
+            type, 
+            category: category || 'Загальні' 
+        };
+
         transactions.push(newTransaction);
 
+        // Перемальовуємо UI
         renderTransactions(transactions);
-
         updateSummaryUI(transactions);
 
         transactionForm.reset();
