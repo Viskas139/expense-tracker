@@ -102,6 +102,8 @@ function updateSummaryUI(items) {
 renderTransactions(transactions);
 updateSummaryUI(transactions);
 
+// Обробник події 'submit': перехоплює стандартну відправку форми, зчитує суму, тип та категорію транзакції, додає новий об'єкт
+// до масиву та оновлює відображення списку операцій і підсумкового балансу.
 const transactionForm = document.querySelector('#add-transaction-form');
 
 if (transactionForm) {
@@ -130,6 +132,7 @@ if (transactionForm) {
         transactionForm.reset();
     });
 
+// Обробник події 'input': виконує валідацію та динамічне зчитування даних з полів введення форми в режимі реального часу.
 const amountInput = document.querySelector('#amount');
 
 if (amountInput) {
