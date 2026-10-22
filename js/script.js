@@ -75,6 +75,13 @@ function renderTransactions(items) {
 
         card.append(title);
 
+        if (item.description) {
+            const desc = document.createElement('p');
+            desc.classList.add('card-description');
+            desc.textContent = item.description;
+            card.append(desc);
+        }
+
         if (listContainer) {
             listContainer.append(card);
         }
@@ -166,10 +173,10 @@ async function loadData() {
         const data = await response.json();
 
         const apiTransactions = data.slice(0, 5).map((item, index) => ({
-            amount: (item.id * 50) + 100,
-            type: index % 2 === 0 ? 'витрата' : 'дохід',
-            category: item.name.substring(0, 20), 
-            description: item.body.substring(0, 50) 
+         amount: item.body.length * 10, 
+        type: item.email.includes('.com') ? 'дохід' : 'витрата',
+        category: item.name.substring(0, 15),
+        description: item.body.substring(0, 40)
         }));
 
         transactions = apiTransactions;
