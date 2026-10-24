@@ -30,21 +30,21 @@
                 <h2>Додати операцію</h2>
                 
                 <!-- Крок 1 (Лаба 8): Форма додавання операції за Варіантом 17 -->
-                <form id="add-transaction-form" class="transaction-form">
+                <form id="add-transaction-form" class="transaction-form" @submit.prevent="addTransaction">
                     <div class="form-group">
                         <label for="amount">Сума (грн):</label>
-                        <input type="number" id="amount" name="amount" step="0.01" min="0.01" required placeholder="Наприклад, 100">
+                        <input type="number" id="amount" name="amount" step="0.01" min="0.01" v-model="newAmount" required placeholder="Наприклад, 100">
                     </div>
                     <div class="form-group">
                         <label for="type">Тип операції:</label>
-                        <select id="type" name="type" required>
+                        <select id="type" name="type" v-model="newType" required>
                             <option value="дохід">дохід</option>
                             <option value="витрата">витрата</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="category">Категорія:</label>
-                        <input type="text" id="category" name="category" required placeholder="Наприклад, Транспорт">
+                        <input type="text" id="category" name="category" v-model="newCategory" required placeholder="Наприклад, Транспорт">
                     </div>
                     <button type="submit" class="submit-btn">Додати</button>
                 </form>
@@ -61,12 +61,12 @@
 
                 <div class="transactions-list">
                     <expense-row 
-                        v-for="(item, index) in transactions" 
-                        :key="item.id || index"
-                        :amount="item.amount"
-                        :type="item.type"
-                        :category="item.category || 'Загальні'">
-                    </expense-row>
+                        v-for="item in transactions" 
+                        :key="item.id" 
+                        :amount="item.amount" 
+                        :type="item.type" 
+                        :category="item.category">
+                     </expense-row>
                 </div>
             </section>
         </main>

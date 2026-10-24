@@ -26,23 +26,44 @@ const app = Vue.createApp({
     },
     data() {
         return {
-            // Крок 3: Реактивний стан масиву транзакцій
+            // Крок 3: Реактивний стан масиву транзакцій (додали унікальні id)
             transactions: [
-                { amount: 2000, type: 'дохід' },
-                { amount: 150, type: 'витрата' },
-                { amount: 350, type: 'витрата' },
-                { amount: 500, type: 'дохід' },
-                { amount: 120, type: 'витрата' }
-            ]
+                { id: 1, amount: 2000, type: 'дохід', category: 'Загальні' },
+                { id: 2, amount: 150, type: 'витрата', category: 'Загальні' },
+                { id: 3, amount: 350, type: 'витрата', category: 'Загальні' },
+                { id: 4, amount: 500, type: 'дохід', category: 'Загальні' },
+                { id: 5, amount: 120, type: 'витрата', category: 'Загальні' }
+            ],
+            // Змінні під поля форми
+            newAmount: '',
+            newType: 'дохід',
+            newCategory: ''
         };
     },
-    // Крок 6: Вичисляємий баланс через computed
+    // Крок 6: Обчислюваний баланс через computed
     computed: {
         totalBalance() {
             return this.transactions.reduce((sum, item) => {
                 const val = Number(item.amount) || 0;
                 return item.type === 'дохід' ? sum + val : sum - val;
             }, 0);
+        }
+    },
+    // ОБРОБНИК ФОРМИ, ЯКОГО НЕ ВИСТАЧАЛО:
+    methods: {
+        addTransaction() {
+            if (!this.newAmount) return;
+
+            this.transactions.push({
+                id: Date.now(), // Унікальний ID
+                amount: Number(this.newAmount),
+                type: this.newType,
+                category: this.newCategory.trim() || 'Загальні'
+            });
+
+            // Очищення полів
+            this.newAmount = '';
+            this.newCategory = '';
         }
     }
 });
