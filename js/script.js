@@ -1,56 +1,60 @@
-// Запит до API для отримання даних
+// Посилання на використаний API ендпоінт: https://jsonplaceholder.typicode.com/comments?postId=2
 const API_URL = 'https://jsonplaceholder.typicode.com/comments?postId=2';
 
-// Крок 4: Компонент ExpenseRow за Варіантом 17
+// 1. Компонент для відображення картки операції (Варіант 17)
 const ExpenseRow = {
-    name: 'ExpenseRow',
-    props: {
-        amount: { type: Number, required: true },
-        type: { type: String, required: true },
-        category: { type: String, default: 'Загальні' }
-    },
+    props: ['amount', 'type', 'category'],
     template: `
-        <div class="transaction-card" :class="type === 'дохід' ? 'income' : 'expense'">
-            <div class="transaction-info">
-                <span class="transaction-amount">{{ amount }} грн ({{ type }})</span>
-                <span class="transaction-category">{{ category }}</span>
-            </div>
-        </div>
+        <article class="transaction-card" :class="type === 'дохід' ? 'income' : 'expense'">
+            <h3 class="card-title">{{ amount }} грн ({{ type }}) — {{ category || 'Загальні' }}</h3>
+        </article>
     `
 };
 
-// Ініціалізація екземпляра Vue 3
+// 2. Створення додатка Vue 3
 const app = Vue.createApp({
     components: {
         ExpenseRow
     },
     data() {
         return {
-            // Крок 3: Реактивний стан масиву транзакцій (додали унікальні id)
+            // Початкові дані з унікальними id
             transactions: [
-                { id: 1, amount: 2000, type: 'дохід', category: 'Загальні' },
-                { id: 2, amount: 150, type: 'витрата', category: 'Загальні' },
-                { id: 3, amount: 350, type: 'витрата', category: 'Загальні' },
-                { id: 4, amount: 500, type: 'дохід', category: 'Загальні' },
-                { id: 5, amount: 120, type: 'витрата', category: 'Загальні' }
+                { id: 1, amount: 2000, type: 'дохід', category: 'Зарплата' },
+                { id: 2, amount: 150, type: 'витрата', category: 'Транспорт' },
+                { id: 3, amount: 350, type: 'витрата', category: 'Продукти' },
+                { id: 4, amount: 500, type: 'дохід', category: 'Фріланс' },
+                { id: 5, amount: 120, type: 'витрата', category: 'Кафе' }
             ],
-            // Змінні під поля форми
+            // Реактивні поля форми
             newAmount: '',
             newType: 'дохід',
-            newCategory: ''
+            newCategory: '',
+            // Стан завантаження та помилок
+            isLoading: false,
+            errorMessage: ''
         };
     },
-    // Крок 6: Обчислюваний баланс через computed
+
     computed: {
+        // Динамічний перерахунок балансу
         totalBalance() {
             return this.transactions.reduce((sum, item) => {
                 const val = Number(item.amount) || 0;
                 return item.type === 'дохід' ? sum + val : sum - val;
             }, 0);
+        },
+        // Динамічний статус бюджету
+        budgetStatus() {
+            return this.totalBalance >= 0 ? 'Бюджет у нормі' : 'Перевищення витрат!';
+        },
+        budgetStatusClass() {
+            return this.totalBalance >= 0 ? 'status-ok' : 'status-warning';
         }
     },
-    // ОБРОБНИК ФОРМИ, ЯКОГО НЕ ВИСТАЧАЛО:
+
     methods: {
+        // Обробник додавання нової операції через форму
         addTransaction() {
             if (!this.newAmount) return;
 
@@ -61,16 +65,10 @@ const app = Vue.createApp({
                 category: this.newCategory.trim() || 'Загальні'
             });
 
-            // Очищення полів
+            // Очищення полів форми
             this.newAmount = '';
             this.newCategory = '';
-        }
-    }
-});
-
-// Монтування Vue додатку
-const vm = app.mount('#app');
-
+        },
 
 // =========================================================================
 // Крок 7: Закоментований застарілий ручний DOM-код для уникнення помилок
@@ -178,50 +176,32 @@ if (transactionForm) {
 }
 */
 
-const amountInput = document.querySelector('#amount');
+// Завантаження даних з API (із збереженням id з API!)
+        async loadApiData() {
+            this.isLoading = true;
+            this.errorMessage = '';
 
-if (amountInput) {
-    amountInput.addEventListener('input', () => {
-        const val = Number(amountInput.value);
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error(`Код помилки: ${response.status}`);
 
-        if (amountInput.value !== '' && val <= 0) {
-            amountInput.setCustomValidity('Сума має бути більшою за нуль');
-        } else {
-            amountInput.setCustomValidity('');
+                const data = await response.json();
+
+                // Беремо id безпосередньо з API об'єктів!
+                this.transactions = data.slice(0, 5).map((item) => ({
+                    id: item.id, // Тепер id точно є і він унікальний з API!
+                    amount: item.body.length * 10,
+                    type: item.email.endsWith('.com') ? 'дохід' : 'витрата',
+                    category: item.name.substring(0, 15)
+                }));
+            } catch (err) {
+                this.errorMessage = 'Записи тимчасово недоступні. Перевірте мережеве з\'єднання.';
+                console.error('Деталі помилки завантаження:', err);
+            } finally {
+                this.isLoading = false;
+            }
         }
-    });
-}
-// Функція асинхронного завантаження даних з API
-async function loadData() {
-    const loadingStatus = document.querySelector('#loading-status');
-    const errorMessage = document.querySelector('#error-message');
-
-    if (loadingStatus) loadingStatus.style.display = 'block';
-    if (errorMessage) errorMessage.style.display = 'none';
-
-    try {
-        const response = await fetch(API_URL);
-
-        if (!response.ok) {
-            throw new Error(`Сервер відповів кодом ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        const apiTransactions = data.map((item, index) => ({
-            amount: (item.id * 50) + 100,
-            type: index % 2 === 0 ? 'витрата' : 'дохід'
-        }));
-
-        vm.transactions = apiTransactions;
-
-    } catch (error) {
-        if (errorMessage) {
-            errorMessage.textContent = 'Записи тимчасово недоступні. Перевірте мережеве зєднання.';
-            errorMessage.style.display = 'block';
-        }
-        console.error('Деталі помилки завантаження:', error);
-    } finally {
-        if (loadingStatus) loadingStatus.style.display = 'none';
     }
-}
+});
+
+app.mount('#app');
