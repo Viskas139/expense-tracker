@@ -11,6 +11,100 @@ const ExpenseRow = {
     `
 };
 
+// КРОК 2: Функції збереження та зчитування з localStorage
+function saveToLocalStorage(items) {
+    try {
+        localStorage.setItem('transactions_backup', JSON.stringify(items));
+    } catch (e) {
+        console.error('Помилка запису в localStorage:', e);
+    }
+}
+
+function loadFromLocalStorage() {
+    try {
+        const raw = localStorage.getItem('transactions_backup');
+        return raw ? JSON.parse(raw) : [];
+    } catch (error) {
+        console.error('Пошкоджені дані в localStorage:', error);
+        return [];
+    }
+}
+
+// КРОК 5 & 6: Константи схеми та відкриття IndexedDB (Варіант 17)
+const DB_NAME = 'ExpenseTrackerDB';
+const DB_VERSION = 1;
+const STORE_NAME = 'transactions';
+
+function openDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+        // Створення сховища при першому запуску або підвищенні версії
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+            }
+        };
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+// КРОК 7: CRUD-функції для роботи з IndexedDB
+
+// Створення або оновлення запису 
+async function addItem(item) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).put(item);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+    });
+}
+
+// Отримання всіх записів із сховища
+async function getAllItems() {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        const request = tx.objectStore(STORE_NAME).getAll();
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+// Видалення запису за ідентифікатором id
+async function deleteItem(id) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).delete(id);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+    });
+}
+
+// КРОК 8: Функція одноразової міграції даних з localStorage в IndexedDB
+async function migrateFromLocalStorage() {
+    const isMigrated = localStorage.getItem('db_migrated');
+    if (!isMigrated) {
+        const localData = loadFromLocalStorage();
+        if (localData && localData.length > 0) {
+            for (const item of localData) {
+                // Видаляємо старий id, щоб IndexedDB згенерувала унікальний ключ autoIncrement
+                const { id, ...itemWithoutId } = item;
+                await addItem(itemWithoutId);
+            }
+            console.log('Міграцію даних з localStorage в IndexedDB успішно виконано.');
+        }
+        // Встановлюємо прапорець, щоб міграція не виконувалася повторно
+        localStorage.setItem('db_migrated', 'true');
+    }
+}
+
 // 2. Створення додатка Vue 3
 const app = Vue.createApp({
     components: {
@@ -54,154 +148,80 @@ const app = Vue.createApp({
     },
 
     methods: {
-        // Обробник додавання нової операції через форму
-        addTransaction() {
-            if (!this.newAmount) return;
-
-            this.transactions.push({
-                id: Date.now(), // Унікальний ID
-                amount: Number(this.newAmount),
-                type: this.newType,
-                category: this.newCategory.trim() || 'Загальні'
-            });
-
-            // Очищення полів форми
-            this.newAmount = '';
-            this.newCategory = '';
-        },
-
-// =========================================================================
-// Крок 7: Закоментований застарілий ручний DOM-код для уникнення помилок
-// =========================================================================
-
-/*
-function calculateBalance(items) {
-    let totalBalance = 0;
-    let totalIncome = 0;
-    let totalExpense = 0;
-
-    for (const item of items) {
-        if (item.type === 'дохід') {
-            totalBalance += item.amount;
-            totalIncome += item.amount;
-        } else if (item.type === 'витрата') {
-            totalBalance -= item.amount;
-            totalExpense += item.amount;
+    // Метод для оновлення масиву транзакцій із бази IndexedDB
+    async refreshList() {
+        try {
+            this.transactions = await getAllItems();
+            // Зберігаємо резервну копію в localStorage (Крок 3)
+            saveToLocalStorage(this.transactions);
+        } catch (err) {
+            console.error('Помилка отримання даних із IndexedDB:', err);
         }
-    }
+    },
 
-    return { totalBalance, totalIncome, totalExpense };
-}
+    // Додавання транзакції в IndexedDB (Крок 9)
+    async addTransaction() {
+        if (!this.newAmount) return;
 
-/*
-const summary = calculateBalance(transactions);
-const toPercent = (part, total) => Math.round((part / total) * 100);
+        const newTx = {
+            amount: Number(this.newAmount),
+            type: this.newType,
+            category: this.newCategory.trim() || 'Загальні',
+            date: new Date().toISOString()
+        };
 
-if (summary.totalIncome > 0) {
-    const expensePercentage = toPercent(summary.totalExpense, summary.totalIncome);
-    console.log(`Витрати складають ${expensePercentage}% від загального доходу`);
-}
-*/
+        await addItem(newTx); // Запис у IndexedDB
+        this.newAmount = '';
+        this.newCategory = '';
+        await this.refreshList(); // Перечитування даних з IndexedDB
+    },
 
-/*
-const listContainer = document.querySelector('#transactions-list .cards');
+    // Видалення транзакції з IndexedDB (Крок 9)
+    async removeTransaction(id) {
+        await deleteItem(id); // Видалення з IndexedDB
+        await this.refreshList(); // Перечитування даних з IndexedDB
+    },
 
-function renderTransactions(items) {
-    if (listContainer) {
-        listContainer.innerHTML = '';
-    }
-
-    items.forEach(item => {
-        const card = document.createElement('article');
-        card.classList.add('transaction-card');
-        card.dataset.amount = item.amount;
-
-        if (item.type === 'дохід') {
-            card.classList.add('income');
-        } else {
-            card.classList.add('expense');
-        }
-
-        const title = document.createElement('h3');
-        title.classList.add('card-title');
-        title.textContent = `${item.amount} грн (${item.type})`;
-
-        card.append(title);
-
-        if (listContainer) {
-            listContainer.append(card);
-        }
-    });
-}
-
-function updateSummaryUI(items) {
-    let totalBalance = 0;
-
-    for (const item of items) {
-        if (item.type === 'дохід') {
-            totalBalance += item.amount;
-        } else if (item.type === 'витрата') {
-            totalBalance -= item.amount;
-        }
-    }
-
-    const balanceElement = document.querySelector('.balance-amount');
-    if (balanceElement) {
-        balanceElement.textContent = `${totalBalance >= 0 ? '+' : ''}${totalBalance} грн`;
-    }
-}
-*/
-
-/*
-const transactionForm = document.querySelector('#add-transaction-form');
-
-if (transactionForm) {
-    transactionForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-
-        const amountInput = document.querySelector('#amount');
-        const typeInput = document.querySelector('#type');
-
-        const amount = Number(amountInput.value);
-        const type = typeInput.value;
-
-        const newTransaction = { amount, type };
-        transactions.push(newTransaction);
-
-        renderTransactions(transactions);
-        updateSummaryUI(transactions);
-
-        transactionForm.reset();
-    });
-}
-*/
-
-// Завантаження даних з API (із збереженням id з API!)
+        // Завантаження з API та запис у IndexedDB
         async loadApiData() {
             this.isLoading = true;
             this.errorMessage = '';
 
             try {
                 const response = await fetch(API_URL);
-                if (!response.ok) throw new Error(`Код помилки: ${response.status}`);
+                if (!response.ok) throw new Error(`Помилка: ${response.status}`);
 
                 const data = await response.json();
-
-                // Беремо id безпосередньо з API об'єктів!
-                this.transactions = data.slice(0, 5).map((item) => ({
-                    id: item.id, // Тепер id точно є і він унікальний з API!
+                const fetched = data.slice(0, 5).map((item) => ({
                     amount: item.body.length * 10,
                     type: item.email.endsWith('.com') ? 'дохід' : 'витрата',
                     category: item.name.substring(0, 15)
                 }));
+
+                for (const tx of fetched) {
+                    await addItem(tx);
+                }
+                await this.refreshList();
             } catch (err) {
-                this.errorMessage = 'Записи тимчасово недоступні. Перевірте мережеве з\'єднання.';
-                console.error('Деталі помилки завантаження:', err);
+                this.errorMessage = 'Помилка завантаження даних API.';
+                console.error(err);
             } finally {
                 this.isLoading = false;
             }
         }
+    }, 
+
+    // КРОК 8, 9 & 11: Ініціалізація, міграція та завантаження з обробкою помилки
+    async mounted() {
+        try {
+            throw new Error("IndexedDB unavailable");
+            await migrateFromLocalStorage();
+            await this.refreshList();
+        } catch (err) {
+            this.errorMessage = 'IndexedDB недоступна у вашому браузері.';
+            console.error(err);
+        }
     }
-});
+}); 
 
 app.mount('#app');

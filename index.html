@@ -53,6 +53,10 @@
 
             <section id="transactions-list">
                 <h2>Останні операції</h2>
+                <!-- Повідомлення про помилку для користувача -->
+                <div v-if="errorMessage" class="error-message" style="color: red; margin: 10px 0; font-weight: bold;">
+                    {{ errorMessage }}
+                </div>
                 <div class="api-controls">
                     <button id="reload-btn" class="submit-btn" @click="loadApiData">Оновити дані з API</button>
                     <p id="loading-status" style="display: none; color: #666; margin-top: 10px;">Завантаження даних...</p>
