@@ -214,7 +214,6 @@ const app = Vue.createApp({
     // КРОК 8, 9 & 11: Ініціалізація, міграція та завантаження з обробкою помилки
     async mounted() {
         try {
-            throw new Error("IndexedDB unavailable");
             await migrateFromLocalStorage();
             await this.refreshList();
         } catch (err) {
