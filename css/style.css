@@ -1,0 +1,247 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.5;
+    background-color: #f8fafc; 
+    color: #0f172a;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+.site-header {
+    background-color: #0f172a; 
+    color: #ffffff;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.site-header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.layout-container {
+    max-width: 1100px;
+    margin: 20px auto;
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+section, .sidebar-balance {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* 
+   ОБҐРУНТУВАННЯ НЕЧІТКОЇ ВИМОГИ:
+   "Має бути зрозуміло з першого погляду, чи все гаразд із бюджетом"
+   1. Підсумковий баланс має наибольший розмір шрифту (2.25rem, Inter extra bold).
+   2. Використано статусну мітку (Бюджет у нормі) для миттєвої оцінки.
+   3. Кожна операція має кольоровий бейдж категорії для швидкого візуального сканування.
+   4. Усі кольори перевірені на контрастність за стандартом WCAG AA (>= 4.5:1).
+*/
+.sidebar-balance {
+    text-align: center;
+    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+    border: 2px solid #cbd5e1;
+}
+
+.balance-title {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #475569;
+}
+
+.balance-amount {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: #0f172a; 
+    margin: 8px 0;
+    letter-spacing: -0.02em;
+}
+
+.balance-status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.status--positive {
+    background-color: #dcfce7;
+    color: #14532d; 
+}
+
+.transaction-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+label {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #1e293b;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    background-color: #ffffff;
+    color: #0f172a;
+}
+
+input:focus, select:focus {
+    outline: 2px solid #2563eb;
+    border-color: transparent;
+}
+
+.submit-btn {
+    background-color: #1d4ed8; 
+    color: #ffffff;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    min-height: 44px;
+    transition: background-color 0.2s;
+}
+
+.submit-btn:hover {
+    background-color: #1e40af;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+.transaction-card {
+    padding: 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #334155;
+}
+
+.amount {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.amount--expense {
+    color: #dc2626;
+}
+
+.amount--income {
+    color: #15803d;
+}
+
+.category-badge {
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.badge--transport { background-color: #e0f2fe; color: #0369a1; }
+.badge--income { background-color: #dcfce7; color: #15803d; }
+.badge--food { background-color: #fef3c7; color: #b45309; }
+
+footer {
+    text-align: center;
+    padding: 24px;
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+@media (min-width: 600px) {
+    .cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .transaction-form {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: flex-end;
+    }
+
+    .form-group {
+        flex: 1 1 180px;
+    }
+
+    .submit-btn {
+        flex: 0 0 auto;
+        padding: 10px 24px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .layout-container {
+        display: grid;
+        grid-template-columns: 3fr 1fr;
+        gap: 24px;
+        align-items: start;
+    }
+
+    .sidebar-balance {
+        grid-column: 2;
+        grid-row: 1;
+        position: sticky;
+        top: 20px;
+    }
+
+    main {
+        grid-column: 1;
+        grid-row: 1;
+    }
+}
