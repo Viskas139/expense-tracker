@@ -51,6 +51,35 @@
 
             </section>
 
+            <!-- КРОК 3 (Лаба 12): Секція кругової діаграми витрат на Canvas (Варіант 17) -->
+            <section id="analytics-chart" class="chart-section">
+                <div class="chart-header">
+                    <h2>Розподіл витрат за категоріями</h2>
+                    <div class="chart-controls">
+                        <button type="button" class="chart-btn" @click="restartChartAnimation">
+                            Перезапустити
+                        </button>
+                        <button type="button" class="chart-btn chart-btn--secondary" @click="toggleChartAnimation">
+                            {{ isChartAnimating ? 'Пауза' : 'Продовжити' }}
+                        </button>
+                    </div>
+                </div>
+
+                <div class="chart-container" v-if="expenseCategories.length > 0">
+                    <canvas id="expensesChart" ref="expensesCanvas" width="260" height="260"></canvas>
+                    
+                    <ul class="chart-legend">
+                        <li v-for="item in expenseCategories" :key="item.category" class="legend-item">
+                            <span class="legend-color" :style="{ backgroundColor: item.color }"></span>
+                            <span class="legend-label">{{ item.category }}</span>
+                            <span class="legend-value">{{ item.amount }} грн ({{ item.percent }}%)</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <p v-else class="empty-chart-msg">Немає даних про витрати для побудови діаграми.</p>
+            </section>
+
             <section id="transactions-list">
                 <h2>Останні операції</h2>
                 <!-- Повідомлення про помилку для користувача -->
