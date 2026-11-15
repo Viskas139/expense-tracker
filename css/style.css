@@ -204,6 +204,103 @@ footer {
     font-size: 0.875rem;
 }
 
+/* === СТИЛІ ДЛЯ КРУГОВОЇ ДІАГРАМИ (ЛАБА 12) === */
+.chart-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.chart-header h2 {
+    margin: 0;
+}
+
+.chart-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.chart-btn {
+    background-color: #1d4ed8;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.chart-btn:hover {
+    background-color: #1e40af;
+}
+
+.chart-btn--secondary {
+    background-color: #475569;
+}
+
+.chart-btn--secondary:hover {
+    background-color: #334155;
+}
+
+.chart-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-around;
+    gap: 24px;
+    padding: 10px 0;
+}
+
+.chart-legend {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1 1 220px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.95rem;
+    padding: 6px 10px;
+    background-color: #f8fafc;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+.legend-color {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.legend-label {
+    font-weight: 600;
+    color: #1e293b;
+    flex-grow: 1;
+}
+
+.legend-value {
+    color: #475569;
+    font-weight: 500;
+}
+
+.empty-chart-msg {
+    color: #64748b;
+    font-style: italic;
+    margin: 8px 0 0;
+}
+
 @media (min-width: 600px) {
     .cards {
         grid-template-columns: repeat(2, 1fr);

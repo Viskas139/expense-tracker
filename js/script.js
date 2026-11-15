@@ -1,6 +1,9 @@
 // Посилання на використаний API ендпоінт: https://jsonplaceholder.typicode.com/comments?postId=2
 const API_URL = 'https://jsonplaceholder.typicode.com/comments?postId=2';
 
+// Палітра кольорів для секторів кругової діаграми (Лаба 12)
+const CHART_COLORS = ['#2563eb', '#dc2626', '#16a34a', '#d97706', '#7c3aed', '#0891b2', '#db2777'];
+
 // 1. Компонент для відображення картки операції (Варіант 17)
 const ExpenseRow = {
     props: ['amount', 'type', 'category'],
@@ -11,7 +14,7 @@ const ExpenseRow = {
     `
 };
 
-// КРОК 2: Функції збереження та зчитування з localStorage
+// КРОК 2 (Лаба 11): Функції збереження та зчитування з localStorage
 function saveToLocalStorage(items) {
     try {
         localStorage.setItem('transactions_backup', JSON.stringify(items));
@@ -30,7 +33,7 @@ function loadFromLocalStorage() {
     }
 }
 
-// КРОК 5 & 6: Константи схеми та відкриття IndexedDB (Варіант 17)
+// КРОК 5 & 6 (Лаба 11): Константи схеми та відкриття IndexedDB (Варіант 17)
 const DB_NAME = 'ExpenseTrackerDB';
 const DB_VERSION = 1;
 const STORE_NAME = 'transactions';
@@ -52,9 +55,7 @@ function openDB() {
     });
 }
 
-// КРОК 7: CRUD-функції для роботи з IndexedDB
-
-// Створення або оновлення запису 
+// КРОК 7 (Лаба 11): CRUD-функції для роботи з IndexedDB
 async function addItem(item) {
     const db = await openDB();
     return new Promise((resolve, reject) => {
@@ -87,7 +88,7 @@ async function deleteItem(id) {
     });
 }
 
-// КРОК 8: Функція одноразової міграції даних з localStorage в IndexedDB
+// КРОК 8 (Лаба 11): Одноразова міграція даних з localStorage в IndexedDB
 async function migrateFromLocalStorage() {
     const isMigrated = localStorage.getItem('db_migrated');
     if (!isMigrated) {
@@ -120,13 +121,18 @@ const app = Vue.createApp({
                 { id: 4, amount: 500, type: 'дохід', category: 'Фріланс' },
                 { id: 5, amount: 120, type: 'витрата', category: 'Кафе' }
             ],
-            // Реактивні поля форми
+            
             newAmount: '',
             newType: 'дохід',
             newCategory: '',
             // Стан завантаження та помилок
             isLoading: false,
-            errorMessage: ''
+            errorMessage: '',
+
+            // КРОК 5 & 7 (Лаба 12): Стан анімації кругової діаграми Canvas
+            animationFrameId: null,
+            animationProgress: 0,
+            isChartAnimating: false
         };
     },
 
@@ -144,43 +150,72 @@ const app = Vue.createApp({
         },
         budgetStatusClass() {
             return this.totalBalance >= 0 ? 'status-ok' : 'status-warning';
+        },
+
+        // КРОК 4 (Лаба 12): Агрегація витрат за категоріями з масиву transactions
+        expenseCategories() {
+            const expenses = this.transactions.filter(item => item.type === 'витрата');
+            const totalExpense = expenses.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+
+            if (totalExpense === 0) return [];
+
+            const grouped = {};
+            expenses.forEach(item => {
+                const cat = (item.category || 'Загальні').trim();
+                grouped[cat] = (grouped[cat] || 0) + (Number(item.amount) || 0);
+            });
+
+            return Object.entries(grouped).map(([category, amount], index) => ({
+                category,
+                amount,
+                percent: Math.round((amount / totalExpense) * 100),
+                color: CHART_COLORS[index % CHART_COLORS.length]
+            }));
+        }
+    },
+
+    // КРОК 6 (Лаба 12): Реакція діаграми на зміну даних користувача
+    watch: {
+        expenseCategories: {
+            handler() {
+                this.$nextTick(() => {
+                    this.restartChartAnimation();
+                });
+            },
+            deep: true
         }
     },
 
     methods: {
-    // Метод для оновлення масиву транзакцій із бази IndexedDB
-    async refreshList() {
-        try {
-            this.transactions = await getAllItems();
-            // Зберігаємо резервну копію в localStorage (Крок 3)
-            saveToLocalStorage(this.transactions);
-        } catch (err) {
-            console.error('Помилка отримання даних із IndexedDB:', err);
-        }
-    },
+        async refreshList() {
+            try {
+                this.transactions = await getAllItems();
+                saveToLocalStorage(this.transactions);
+            } catch (err) {
+                console.error('Помилка отримання даних із IndexedDB:', err);
+            }
+        },
 
-    // Додавання транзакції в IndexedDB (Крок 9)
-    async addTransaction() {
-        if (!this.newAmount) return;
+        async addTransaction() {
+            if (!this.newAmount) return;
 
-        const newTx = {
-            amount: Number(this.newAmount),
-            type: this.newType,
-            category: this.newCategory.trim() || 'Загальні',
-            date: new Date().toISOString()
-        };
+            const newTx = {
+                amount: Number(this.newAmount),
+                type: this.newType,
+                category: this.newCategory.trim() || 'Загальні',
+                date: new Date().toISOString()
+            };
 
-        await addItem(newTx); // Запис у IndexedDB
-        this.newAmount = '';
-        this.newCategory = '';
-        await this.refreshList(); // Перечитування даних з IndexedDB
-    },
+            await addItem(newTx);
+            this.newAmount = '';
+            this.newCategory = '';
+            await this.refreshList();
+        },
 
-    // Видалення транзакції з IndexedDB (Крок 9)
-    async removeTransaction(id) {
-        await deleteItem(id); // Видалення з IndexedDB
-        await this.refreshList(); // Перечитування даних з IndexedDB
-    },
+        async removeTransaction(id) {
+            await deleteItem(id);
+            await this.refreshList();
+        },
 
         // Завантаження з API та запис у IndexedDB
         async loadApiData() {
@@ -208,19 +243,138 @@ const app = Vue.createApp({
             } finally {
                 this.isLoading = false;
             }
-        }
-    }, 
+        },
 
-    // КРОК 8, 9 & 11: Ініціалізація, міграція та завантаження з обробкою помилки
+        // === КРОК 3, 5, 7, 8 (Лаба 12): Малювання та анімація кругової діаграми на Canvas ===
+        drawPieChart(progress) {
+            const canvas = this.$refs.expensesCanvas;
+            if (!canvas) return;
+
+            // Отримання 2D-контексту полотна (Крок 3)
+            const ctx = canvas.getContext('2d');
+            const categories = this.expenseCategories;
+            const total = categories.reduce((sum, item) => sum + item.amount, 0);
+
+            // Очищення кадру перед перемальовуванням (Крок 5)
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (total === 0) return;
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = Math.min(centerX, centerY) - 10;
+
+            // Початковий кут (-90 градусів, тобто зверху по центру)
+            let startAngle = -Math.PI / 2;
+            const maxAngle = Math.PI * 2 * progress;
+            let drawnAngle = 0;
+
+            categories.forEach((item) => {
+                const sliceAngle = (item.amount / total) * Math.PI * 2;
+                const currentSlice = Math.min(sliceAngle, Math.max(0, maxAngle - drawnAngle));
+
+                if (currentSlice > 0) {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY);
+                    // Малювання сектора через ctx.arc() (Варіант 17)
+                    ctx.arc(centerX, centerY, radius, startAngle, startAngle + currentSlice);
+                    ctx.closePath();
+
+                    ctx.fillStyle = item.color;
+                    ctx.fill();
+
+                    // Біла рамка між секторами для чіткості
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.stroke();
+                    ctx.restore();
+                }
+
+                startAngle += sliceAngle;
+                drawnAngle += sliceAngle;
+            });
+
+            // Внутрішнє біле коло (ефект кільцевої діаграми / Donut)
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius * 0.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+
+            // Текст загальної суми витрат у центрі діаграми
+            ctx.fillStyle = '#0f172a';
+            ctx.font = 'bold 16px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(`${total} грн`, centerX, centerY);
+            ctx.restore();
+        },
+
+        // Цикл анімації через requestAnimationFrame (Крок 5)
+        animateChartLoop() {
+            if (!this.isChartAnimating) return;
+
+            this.animationProgress += 0.03; // Плавний крок розгортання
+            if (this.animationProgress >= 1) {
+                this.animationProgress = 1;
+                this.drawPieChart(1);
+                this.isChartAnimating = false;
+                return;
+            }
+
+            this.drawPieChart(this.animationProgress);
+            this.animationFrameId = requestAnimationFrame(this.animateChartLoop);
+        },
+
+        // Перезапуск анімації з нуля (Крок 7)
+        restartChartAnimation() {
+            this.stopChartAnimation();
+            this.animationProgress = 0;
+            this.isChartAnimating = true;
+            this.animateChartLoop();
+        },
+
+        // Пауза або продовження анімації (Крок 7)
+        toggleChartAnimation() {
+            if (this.isChartAnimating) {
+                this.stopChartAnimation();
+            } else {
+                if (this.animationProgress >= 1) {
+                    this.animationProgress = 0;
+                }
+                this.isChartAnimating = true;
+                this.animateChartLoop();
+            }
+        },
+
+        // Зупинка циклу requestAnimationFrame (Крок 8)
+        stopChartAnimation() {
+            this.isChartAnimating = false;
+            if (this.animationFrameId) {
+                cancelAnimationFrame(this.animationFrameId);
+                this.animationFrameId = null;
+            }
+        }
+    },
+
     async mounted() {
         try {
             await migrateFromLocalStorage();
             await this.refreshList();
+            this.$nextTick(() => {
+                this.restartChartAnimation();
+            });
         } catch (err) {
             this.errorMessage = 'IndexedDB недоступна у вашому браузері.';
             console.error(err);
         }
+    },
+
+    // КРОК 8 (Лаба 12): Коректне завершення анімації при розмонтуванні компонента
+    beforeUnmount() {
+        this.stopChartAnimation();
     }
-}); 
+});
 
 app.mount('#app');
